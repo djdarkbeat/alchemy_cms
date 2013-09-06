@@ -1,8 +1,17 @@
 <% cache(content) do %>
 <% options = local_assigns.fetch(:options, {}) %>
-<%- if options[:shorten_to].blank? -%>
-<%= raw content.essence.send(options[:plain_text] ? :stripped_body : :body) %>
-<%- else -%>
-<%= raw content.essence.send(options[:plain_text] ? :stripped_body : :body).split(" ").first(options[:shorten_to]).join(" ") + (options[:shorten_suffix] || '…') %>
-<%- end -%>
+<% output = capture do %>
+  <%- if options[:shorten_to].blank? -%>
+  <%= raw content.essence.send(options[:plain_text] ? :stripped_body : :body) %>
+  <%- else -%>
+  <%= raw content.essence.send(options[:plain_text] ? :stripped_body : :body).split(" ").first(options[:shorten_to]).join(" ") + (options[:shorten_suffix] || '…') %>
+  <%- end -%>
+<% end %>
+<% if @preview_mode %>
+<alchemy:content data-alchemy-content-id="<%= content.id %>">
+  <%= output %>
+</alchemy:content>
+<% else %>
+<%= output %>
+<% end %>
 <% end %>

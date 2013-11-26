@@ -47,7 +47,18 @@ module Alchemy
       }
     end
 
-  private
+    # Returns a correct options hash for resized image urls.
+    #
+    def resize_url_options(options)
+      options.merge(
+        size: options.delete(:image_size),
+        crop: options[:crop] ? 'crop' : nil,
+        crop_from: options[:crop] && !crop_from.blank? ? crop_from : nil,
+        crop_size: options[:crop] && !crop_size.blank? ? crop_size : nil
+      ).delete_if { |k, v| v.blank? }
+    end
+
+    private
 
     def fix_crop_values
       %w(crop_from crop_size).each do |crop_value|

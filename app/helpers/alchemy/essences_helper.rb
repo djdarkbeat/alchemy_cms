@@ -117,34 +117,29 @@ module Alchemy
     # Renders a essence picture
     #
     def render_essence_picture_view(content, options, html_options)
-      options = {:show_caption => true, :disable_link => false}.update(options)
+      options = {show_caption: true, disable_link: false}.update(options)
       if content.essence.picture.blank? && @preview_mode
         content_tag('alchemy:element', '', data: {'alchemy-content-id' => content.id})
       elsif content.essence.picture.blank?
         return
       else
         if content.essence.caption.present? && options[:show_caption]
-          caption = content_tag(:figcaption, content.essence.caption, :id => "#{dom_id(content.essence.picture)}_caption", :class => "image_caption")
+          caption = content_tag(:figcaption, content.essence.caption, id: "#{dom_id(content.essence.picture)}_caption", class: "image_caption")
         end
-        img_tag = image_tag(
-          show_alchemy_picture_path(content.essence.picture,
-            options.merge(
-              :size => options.delete(:image_size),
-              :crop_from => options[:crop] && !content.essence.crop_from.blank? ? content.essence.crop_from : nil,
-              :crop_size => options[:crop] && !content.essence.crop_size.blank? ? content.essence.crop_size : nil
-            ).delete_if { |k, v| v.blank? || k.to_sym == :show_caption || k.to_sym == :disable_link }
-          ),
-          {
-            :alt => (content.essence.alt_tag.blank? ? nil : content.essence.alt_tag),
-            :title => (content.essence.title.blank? ? nil : content.essence.title),
-            :class => (caption || content.essence.css_class.blank? ? nil : content.essence.css_class)
-          }.merge(caption ? {} : html_options)
-        )
+        img_tag = image_tag(show_alchemy_picture_path(content.essence.picture,
+          content.essence.resize_url_options(options.delete_if { |k, v|
+            k.to_sym == :show_caption || k.to_sym == :disable_link
+          })
+        ), {
+          alt: (content.essence.alt_tag.blank? ? nil : content.essence.alt_tag),
+          title: (content.essence.title.blank? ? nil : content.essence.title),
+          class: (caption || content.essence.css_class.blank? ? nil : content.essence.css_class)
+        }.merge(caption ? {} : html_options))
         output = caption ? img_tag + caption : img_tag
         if content.essence.link.present? && !options[:disable_link]
           output = link_to(url_for(content.essence.link), {
-            :title => content.essence.link_title.blank? ? nil : content.essence.link_title,
-            :target => (content.essence.link_target == "blank" ? "_blank" : nil),
+            title: content.essence.link_title.blank? ? nil : content.essence.link_title,
+            target: (content.essence.link_target == "blank" ? "_blank" : nil),
             'data-link-target' => content.essence.link_target.blank? ? nil : content.essence.link_target
           }) do
             output
